@@ -1,10 +1,10 @@
-import           Data.Bits
+import Data.Bits ( Bits((.&.), shiftR) )
 import qualified Data.Char as Char (toLower)
 import qualified Data.Map.Lazy as Map (fromListWith, map, toList)
-import           Data.Word
-import           Text.Printf
+import Data.Word ()
+import Text.Printf ( printf )
 
-data CharCount = CharCount Char Int 
+data CharCount = CharCount Char Int deriving Show
 count :: CharCount -> Int
 count (CharCount _ cnt) = cnt
 
@@ -18,7 +18,7 @@ counts :: [CharCount] -> [Int]
 counts = map count
 
 prob :: CharCount -> [CharCount] -> Float
-prob charCount xs = fromIntegral (count charCount) / (fromIntegral $ sum $ counts xs)
+prob charCount xs = fromIntegral (count charCount) / fromIntegral (sum $ counts xs)
 
 probs :: [CharCount] -> [Float]
 probs xs = map (prob' xs) xs where prob' a b = prob b a
@@ -29,24 +29,24 @@ toAsciiCodes = map fromEnum
 
 
 toBitLists :: String -> [[Bool]]
-toBitLists xs = map (normalizeBitList) $ map (toBitList) xs
+toBitLists = map (normalizeBitList . toBitList)
 
 normalizeBitList :: [Bool] -> [Bool]
 
-normalizeBitList xs = if len == 8 
-    then xs 
-    else if len < 8 
-        then (take (8 - len) (repeat False)) ++ xs 
-        else error "list too big" 
-        where len = length xs
+normalizeBitList xs
+  | len == 8 = xs
+  | len < 8 = replicate (8 - len) False ++ xs
+  | otherwise = error "list too big"
+  where
+      len = length xs
 
 toBitList :: Char -> [Bool]
 toBitList '\0' = []
-toBitList c = toBitList (toEnum(fromEnum(c) `shiftR` 1) :: Char) ++ [toBool(fromEnum(c) .&. 1)]
+toBitList c = toBitList (toEnum(fromEnum c `shiftR` 1) :: Char) ++ [toBool(fromEnum c .&. 1)]
 
 
 toCharList :: [Bool] -> [Char]
-toCharList xs = map (toChar) xs where toChar a = if a == True then '1' else '0'
+toCharList = map (\a -> if a then '1' else '0')
 
 
 toBool :: Int -> Bool
@@ -58,30 +58,30 @@ toFlatBitList xs = concat $ toBitLists xs
 
 
 countChars :: String -> [CharCount]
-countChars text = Prelude.map (toCharCount) $ Map.toList $ Map.fromListWith (+) [(c, 1) | c <- text] where toCharCount (a, b) = (CharCount a b)
+countChars text = Prelude.map toCharCount $ Map.toList $ Map.fromListWith (+) [(c, 1) | c <- text] where toCharCount (a, b) = CharCount a b
 
 
 shenon :: [CharCount] -> Float
 
-shenon xs = -sum (map (probmult) $ probs xs) where probmult a = a * (logBase 2 a)
+shenon xs = -sum (map probmult $ probs xs) where probmult a = a * logBase 2 a
 
 hartley :: [Char] -> Float
 hartley xs = logBase 2 $ fromIntegral $ length xs
 
 filterNonAlphabet :: String -> [Char] -> String
-filterNonAlphabet text alphabet = filter (\x -> x `elem` alphabet) $ map (Char.toLower) text  
+filterNonAlphabet text alphabet = filter (`elem` alphabet) $ map Char.toLower text
 
 
 
 
 informationAmount :: Float -> Int -> Float
-informationAmount entropy textLen = entropy * (fromIntegral textLen)
+informationAmount entropy textLen = entropy * fromIntegral textLen
 
 coalesce :: Float -> Float -> Float
 coalesce x y = if isNaN x || isInfinite x then y else x
 
 conditionalEntropy :: Float -> Float
-conditionalEntropy p = -(p * (coalesce (logBase 2 p) 0)) - (q * (coalesce (logBase 2 q) 0)) where q = 1 - p
+conditionalEntropy p = -(p * coalesce (logBase 2 p) 0) - (q * coalesce (logBase 2 q) 0) where q = 1 - p
 
 
 effectiveEntropy :: Float -> Float -> Float
@@ -96,12 +96,15 @@ main = do
     print filtered
 
     let englishCharCount = countChars filtered
+
+    print englishCharCount
+
     let englishEntropy = shenon englishCharCount
-    
+
     printf "English entropy %f\n" englishEntropy
 
 --b
-    let bitText = toCharList $ toFlatBitList filtered 
+    let bitText = toCharList $ toFlatBitList filtered
 
     let bitCharCount = countChars bitText
     let bitEntropy = shenon bitCharCount
@@ -118,7 +121,7 @@ main = do
     printf "English information amount %f\n" englishInformationAmount
 
     let bitLen = englishLen * 8
-    let bitInfoAmount entropy = informationAmount entropy bitLen 
+    let bitInfoAmount entropy = informationAmount entropy bitLen
 
     let bitInformationAmount = bitInfoAmount bitEntropy
 
@@ -144,7 +147,7 @@ main = do
 
     let englishFormatString = "English information amount (p = %f): %f\n"
 
-    printf englishFormatString p0 englishInformationAmount0 
+    printf englishFormatString p0 englishInformationAmount0
     printf englishFormatString p1 englishInformationAmount1
     printf englishFormatString p2 englishInformationAmount2
 
@@ -160,7 +163,7 @@ main = do
 
     let bitFormatString = "English information amount (p = %f): %f\n"
 
-    printf bitFormatString p0 bitInformationAmount0 
+    printf bitFormatString p0 bitInformationAmount0
     printf bitFormatString p1 bitInformationAmount1
     printf bitFormatString p2 bitInformationAmount2
 

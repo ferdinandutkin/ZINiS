@@ -1,8 +1,8 @@
-import Data.Bits ( Bits((.&.), shiftR) )
+import           Data.Bits ( Bits((.&.), shiftR) )
 import qualified Data.Char as Char (toLower)
 import qualified Data.Map.Lazy as Map (fromListWith, map, toList)
-import Data.Word ()
-import Text.Printf ( printf )
+import           Data.Word ()
+import           Text.Printf ( printf )
 
 data CharCount = CharCount Char Int deriving Show
 count :: CharCount -> Int
@@ -58,12 +58,12 @@ toFlatBitList xs = concat $ toBitLists xs
 
 
 countChars :: String -> [CharCount]
-countChars text = Prelude.map toCharCount $ Map.toList $ Map.fromListWith (+) [(c, 1) | c <- text] where toCharCount (a, b) = CharCount a b
+countChars text = Prelude.map (uncurry CharCount) $ Map.toList $ Map.fromListWith (+) [(c, 1) | c <- text]
 
 
 shenon :: [CharCount] -> Float
 
-shenon xs = -sum (map probmult $ probs xs) where probmult a = a * logBase 2 a
+shenon xs = -sum (map (\a -> a * logBase 2 a) $ probs xs) 
 
 hartley :: [Char] -> Float
 hartley xs = logBase 2 $ fromIntegral $ length xs

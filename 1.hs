@@ -54,7 +54,7 @@ toBool 0 = False
 toBool _ = True
 
 toFlatBitList :: String -> [Bool]
-toFlatBitList xs = concat $ toBitLists xs
+toFlatBitList = concat . toBitLists
 
 
 countChars :: String -> [CharCount]
@@ -89,25 +89,29 @@ main :: IO ()
 main = do
     englishText <- readFile "holocaust.txt"
 
+
 --a
     let filtered = filterNonAlphabet englishText ['a'..'z']
     print filtered
 
     let englishCharCount = countChars filtered
 
-    print englishCharCount
-
     let englishEntropy = shenon englishCharCount
 
-    printf "English entropy %f\n" englishEntropy
+    print englishCharCount
+
+    printf "English entropy (H): %f\n" englishEntropy
 
 --b
     let bitText = toCharList $ toFlatBitList filtered
 
     let bitCharCount = countChars bitText
+
     let bitEntropy = shenon bitCharCount
 
-    printf "Binary entropy %f\n" bitEntropy
+    print bitCharCount
+
+    printf "Binary entropy (H): %f\n" bitEntropy
 --c
     let name = "Tumash Stanislav Igorevich"
 
@@ -116,14 +120,14 @@ main = do
 
     let englishInformationAmount = engInfoAmount englishEntropy
 
-    printf "English information amount %f\n" englishInformationAmount
+    printf "English information amount (I): %f\n" englishInformationAmount
 
     let bitLen = englishLen * 8
     let bitInfoAmount entropy = informationAmount entropy bitLen
 
     let bitInformationAmount = bitInfoAmount bitEntropy
 
-    printf "Binary information amount %f\n" bitInformationAmount
+    printf "Binary information amount (I): %f\n" bitInformationAmount
 
 --d
 
@@ -143,7 +147,7 @@ main = do
     let englishInformationAmount1 = engInfoAmount effectiveEnglishEntropy1
     let englishInformationAmount2 = engInfoAmount effectiveEnglishEntropy2
 
-    let englishFormatString = "English information amount (p = %f): %f\n"
+    let englishFormatString = "English information amount (I) (p = %f): %f\n"
 
     printf englishFormatString p0 englishInformationAmount0
     printf englishFormatString p1 englishInformationAmount1
@@ -159,7 +163,7 @@ main = do
     let bitInformationAmount2 = bitInfoAmount effectiveBitEntropy2
 
 
-    let bitFormatString = "English information amount (p = %f): %f\n"
+    let bitFormatString = "Binary information amount (I) (p = %f): %f\n"
 
     printf bitFormatString p0 bitInformationAmount0
     printf bitFormatString p1 bitInformationAmount1

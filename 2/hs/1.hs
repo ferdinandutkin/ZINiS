@@ -65,6 +65,7 @@ printRedundancy text alphabet = do
 printInfo :: [Char] -> String -> IO ()
 printInfo fileName alphabet = do
     fileContent <- readFile fileName
+    print $ countChars fileContent
     printShenon alphabet
     printHartley alphabet
     printRedundancy fileContent alphabet
@@ -85,6 +86,7 @@ main = do
 
     print "English: "
     printInfo inputFileName englishAlphabet
+  
 
     print "Base64: "
     printInfo outputFileName base64Alphabet

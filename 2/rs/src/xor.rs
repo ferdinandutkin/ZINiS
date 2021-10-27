@@ -14,7 +14,6 @@ impl BitXOR<String> for String {
                 .chain(self.chars())
                 .flat_map(to_bits);
 
-
         let other_bits = iter::repeat('\0')
                 .take(if self.len() > other.len() {self.len() - other.len()} else { 0 })
                 .chain(other.chars())
@@ -36,16 +35,16 @@ pub fn to_bit_str(str : &String) -> String {
 }
 
 pub fn bool_to_char(b : bool) -> char {
-    if b {'0'}  else {'1'}
+    if b {'1'}  else {'0'}
 }
 pub fn to_bits(source: char) -> Vec<bool> {
     let mut bits = vec![false; 8];
-    let mut idx = bits.len() - 1;
+    let mut idx = bits.len() as i32 - 1;
     let mut source_int = source as i32;
-    while source_int != 0  {
-        bits[idx] = (source_int & 1) != 0;
+    while idx != -1  {
+        bits[idx as usize] = (source_int & 1) != 0;
         idx -= 1;
-        source_int /= 10;
+        source_int /= 2;
     }
     bits
 }

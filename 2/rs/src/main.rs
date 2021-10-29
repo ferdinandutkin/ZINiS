@@ -42,8 +42,7 @@ fn main() {
         .unwrap_or(default_output_file_name);
 
     let content = fs::read_to_string(input_file_name)
-        .expect(format!("file {} not found", input_file_name)
-            .as_str());
+        .expect(&format!("file {} not found", input_file_name));
 
 
     let output = encode(content.as_bytes());
@@ -58,7 +57,7 @@ fn main() {
 
     output_file
         .write(output.as_bytes())
-        .expect(format!("error while writing to {}", output_file_name).as_str());
+        .expect(&format!("error while writing to {}", output_file_name));
 
 
 

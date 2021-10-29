@@ -1,7 +1,7 @@
 use std::iter::FromIterator;
 use core::iter;
 
-pub trait BitXOR<T : BitXOR<T>> {
+pub trait BitXOR<T> {
     fn xor_with(&self, other: &T) -> T;
 }
 

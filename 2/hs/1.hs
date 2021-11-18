@@ -22,8 +22,7 @@ prob :: CharCount -> [CharCount] -> Float
 prob charCount xs = fromIntegral (count charCount) / fromIntegral (sum $ counts xs)
 
 probs :: [CharCount] -> [Float]
-probs xs = map (prob' xs) xs where prob' a b = prob b a
-
+probs xs = map (`prob` xs) xs
 
 countChars :: String -> [CharCount]
 countChars text = Prelude.map (uncurry CharCount) $ Map.toList $ Map.fromListWith (+) [(c, 1) | c <- text]
@@ -51,22 +50,28 @@ printShenon text = do
     let shenonEntropy = shenon charCount
     printf "shenon: %f\n" shenonEntropy
 
-printHartley :: [Char] -> IO () 
-printHartley alphabet = do 
+filterNonAlphabet :: String -> [Char] -> String
+filterNonAlphabet text alphabet = filter (`elem` alphabet) $ map Char.toLower text
+
+printHartley :: [Char] -> IO ()
+printHartley alphabet = do
     printf "alphabet: %s\n" $ show alphabet
     printf "hartley entropy: %f\n" $ hartley alphabet
 
 
-printRedundancy :: String -> [Char] -> IO () 
-printRedundancy text alphabet = do 
+printRedundancy :: String -> [Char] -> IO ()
+printRedundancy text alphabet = do
     printf "redundancy: %f %%\n" $ redundancy text alphabet
 
 
 printInfo :: [Char] -> String -> IO ()
 printInfo fileName alphabet = do
     fileContent <- readFile fileName
-    print $ countChars fileContent
-    printShenon alphabet
+    let filtered = filterNonAlphabet fileContent alphabet
+    let cnts =  countChars filtered
+    print cnts
+    print $ probs cnts
+    printShenon filtered
     printHartley alphabet
     printRedundancy fileContent alphabet
 
@@ -81,12 +86,12 @@ main = do
     let inputFileName =  defIndex args 0 "input.txt"
     let outputFileName = defIndex args 1 "output.txt"
 
-    let englishAlphabet = ['a'..'z'] 
+    let englishAlphabet = ['a'..'z']
     let base64Alphabet = ['A'.. 'Z'] ++  ['a'..'z'] ++ ['0'..'9'] ++ ['+', '/', '=']
 
     print "English: "
     printInfo inputFileName englishAlphabet
-  
+
 
     print "Base64: "
     printInfo outputFileName base64Alphabet
